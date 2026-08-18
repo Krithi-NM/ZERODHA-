@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/zerodha
+      - PORT=3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  dashboard:
+    build: ./dashboard
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend

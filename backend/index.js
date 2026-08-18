@@ -11,7 +11,7 @@ const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
 
 const PORT = process.env.PORT || 3002;
-const uri = process.env.MONGO_URL;
+const uri = process.env.MONGO_URL || "mongodb://localhost:27017/zerodha";
 
 const app = express();
 
@@ -190,6 +190,12 @@ app.use(bodyParser.json());
 app.get("/allHoldings", async (req, res) => {
   let allHoldings = await HoldingsModel.find({});
   res.json(allHoldings);
+});
+
+// Health check for load-balancers / container platforms
+app.get('/health', async (req, res) => {
+  const dbState = mongoose.connection.readyState; // 1 = connected
+  res.json({ status: 'ok', db: dbState === 1 ? 'connected' : 'disconnected' });
 });
 
 app.get("/allPositions", async (req, res) => {
